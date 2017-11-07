@@ -46,10 +46,6 @@ describe Prometheus::Middleware::Collector do
     metric = :http_server_request_duration_seconds
     labels = { method: 'get', path: '/foo' }
     expect(registry.get(metric).get(labels)).to include(0.1 => 0, 0.25 => 1)
-
-    metric = :http_server_request_duration_quantiles
-    labels = { method: 'get', path: '/foo' }
-    expect(registry.get(metric).get(labels)).to include(0.5 => 0.2, 0.90 => 0.2, 0.99 => 0.2)
   end
 
   it 'normalizes paths containing numeric IDs by default' do
@@ -64,10 +60,6 @@ describe Prometheus::Middleware::Collector do
     metric = :http_server_request_duration_seconds
     labels = { method: 'get', path: '/foo/:id/bars' }
     expect(registry.get(metric).get(labels)).to include(0.1 => 0, 0.5 => 1)
-
-    metric = :http_server_request_duration_quantiles
-    labels = { method: 'get', path: '/foo/:id/bars' }
-    expect(registry.get(metric).get(labels)).to include(0.5 => 0.3, 0.90 => 0.3, 0.99 => 0.3)
   end
 
   it 'normalizes paths containing UUIDs by default' do
@@ -82,10 +74,6 @@ describe Prometheus::Middleware::Collector do
     metric = :http_server_request_duration_seconds
     labels = { method: 'get', path: '/foo/:uuid/bars' }
     expect(registry.get(metric).get(labels)).to include(0.1 => 0, 0.5 => 1)
-
-    metric = :http_server_request_duration_quantiles
-    labels = { method: 'get', path: '/foo/:uuid/bars' }
-    expect(registry.get(metric).get(labels)).to include(0.5 => 0.3, 0.90 => 0.3, 0.99 => 0.3)
   end
 
   context 'when the app raises an exception' do
@@ -152,16 +140,12 @@ describe Prometheus::Middleware::Collector do
       expect(
         registry.get(:lolrus_exceptions_total),
       ).to be_a(Prometheus::Client::Counter)
-      expect(
-        registry.get(:lolrus_request_duration_quantiles),
-      ).to be_a(Prometheus::Client::Summary)
     end
 
     it "doesn't register the default metrics" do
       expect(registry.get(:http_server_requests_total)).to be(nil)
       expect(registry.get(:http_server_request_duration_seconds)).to be(nil)
       expect(registry.get(:http_server_exceptions_total)).to be(nil)
-      expect(registry.get(:http_server_request_duration_quantiles)).to be(nil)
     end
   end
 end
